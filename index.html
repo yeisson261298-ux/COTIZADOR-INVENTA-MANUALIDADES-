@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1b1b1b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Precio de Circuito</title>
+  <style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif}
+body{min-height:100vh}
+.app{width:100%;max-width:760px;margin:0 auto;padding:10px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.top h1{font-size:20px;margin:0;font-weight:800}
+.top p{margin:3px 0 0;color:#666;font-size:12px}
+.reset{border:0;border-radius:9px;background:#222;color:#fff;font-weight:800;padding:10px 12px}
+.table{width:100%;overflow:hidden;border:1px solid #111;border-radius:5px}
+.row{display:grid;grid-template-columns:minmax(0,40%) 15% 20% 25%;min-height:42px}
+.row>div{border-right:1px solid #111;border-bottom:1px solid #111;display:flex;align-items:center;justify-content:center;text-align:center}
+.row>div:last-child{border-right:0}
+.header{background:#ffd966;font-weight:800;font-size:12px;min-height:44px}
+.header>div{padding:5px}
+.component{background:#d9e6f2;font-size:12px;font-weight:800;padding:4px}
+.price{background:#f4cccc;font-size:13px;font-weight:800}
+.qty{background:#ffc000;padding:4px}
+.qty input{width:100%;height:34px;border:1px solid #777;border-radius:5px;background:#fff;text-align:center;font-size:17px;font-weight:800;outline:none}
+.qty input:focus{border:2px solid #222}
+.total{background:#B3E5FC;font-size:14px;font-weight:900}
+.summary{display:grid;grid-template-columns:75% 25%;min-height:44px}
+.summary-label,.summary-value{border-bottom:1px solid #111;display:flex;align-items:center;justify-content:center;font-weight:900}
+.summary-label{background:#ffe699;border-right:1px solid #111;font-size:12px}
+.summary-value{background:#ffe699;font-size:16px}
+.cobrar .summary-label,.cobrar .summary-value{background:#d9ead3}
+.cobrar .summary-label{border-right:1px solid #111}
+.offline{text-align:center;color:#666;font-size:11px;margin:10px 0}
+@media(max-width:430px){
+ .app{padding:6px}
+ .top h1{font-size:17px}
+ .reset{font-size:11px;padding:9px}
+ .header{font-size:10px}
+ .component{font-size:10px}
+ .price{font-size:12px}
+ .row{min-height:40px}
+ .qty input{height:32px;font-size:16px}
+ .total{font-size:12px}
+ .summary-label{font-size:10px}
+}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <div>
+        <h1>PRECIO DE CIRCUITO</h1>
+        <p>Calculadora de materiales</p>
+      </div>
+      <button id="resetBtn" class="reset" type="button">LIMPIAR</button>
+    </header>
+
+    <section class="table" aria-label="Precio de circuito">
+      <div class="row header">
+        <div>COMPONENTE</div>
+        <div>PRECIO</div>
+        <div>CANTIDAD</div>
+        <div>PRECIO TOTAL</div>
+      </div>
+
+      <div id="rows"></div>
+
+      <div class="summary">
+        <div class="summary-label">PRECIO TOTAL</div>
+        <div id="grandTotal" class="summary-value">0</div>
+      </div>
+      <div class="summary cobrar">
+        <div class="summary-label">MONTO / COBRAR</div>
+        <div id="chargeTotal" class="summary-value">0</div>
+      </div>
+    </section>
+
+    <p class="offline">● Aplicación local · funciona sin Internet</p>
+  </main>
+  <script>
+const data = [
+  ["PORTAPILAS",2],
+  ["INTERRUPTOR",1],
+  ["LED",0.5],
+  ["MOTOR DC - BAJO",6],
+  ["MOTOR MABUCHI - MEDIO",9],
+  ["MOTOR MABUCHI MMN - ALTO",10],
+  ["MOTOR - BOMBA DE AGUA",9],
+  ["PANEL - BAJO",12],
+  ["PANEL - MEDIO",15],
+  ["BROCHE PARA BATERIA",2],
+  ["CABLE",0.5],
+  ["MANGUERA (VENOCLISIS)",1],
+  ["JERINGA",0.3],
+  ["BATERIA TOSHIBA",7],
+  ["BATERIA DURACELL",17],
+  ["PILA PANASONIC",2],
+  ["PILA DURACELL",7]
+];
+
+const rows = document.getElementById("rows");
+const grandTotal = document.getElementById("grandTotal");
+const chargeTotal = document.getElementById("chargeTotal");
+const resetBtn = document.getElementById("resetBtn");
+
+function money(n){
+  return n.toLocaleString("es-PE",{minimumFractionDigits:0,maximumFractionDigits:2});
+}
+
+data.forEach(([name,price],i)=>{
+  const row=document.createElement("div");
+  row.className="row";
+  row.innerHTML=`
+    <div class="component">${name}</div>
+    <div class="price">${price}</div>
+    <div class="qty"><input id="q${i}" type="number" min="0" step="0.01" inputmode="decimal" autocomplete="off" aria-label="Cantidad de ${name}"></div>
+    <div class="total" id="t${i}">0</div>
+  `;
+  rows.appendChild(row);
+});
+
+function calculate(){
+  let sum=0;
+  data.forEach(([,price],i)=>{
+    const input=document.getElementById(`q${i}`);
+    const qty=parseFloat(input.value)||0;
+    const total=price*qty;
+    document.getElementById(`t${i}`).textContent=money(total);
+    sum+=total;
+  });
+  grandTotal.textContent=money(sum);
+  chargeTotal.textContent=money(sum*3);
+}
+
+rows.addEventListener("input",calculate);
+
+resetBtn.addEventListener("click",()=>{
+  rows.querySelectorAll("input").forEach(input=>input.value="");
+  calculate();
+});
+
+calculate();
+  </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+      });
+    }
+  </script>
+</body>
+</html>
