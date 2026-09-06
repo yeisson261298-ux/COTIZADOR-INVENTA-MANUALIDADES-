@@ -3,60 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#1b1b1b">
+  <meta name="theme-color" content="#0b1220">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>Precio de Circuito</title>
   <style>
+:root{
+  --bg:#0b1220;
+  --surface:#121a2c;
+  --surface-2:#182338;
+  --surface-3:#0e1728;
+  --border:#243050;
+  --text:#e8edf7;
+  --text-dim:#8b98b3;
+  --teal:#2dd4bf;
+  --teal-dim:rgba(45,212,191,.13);
+  --copper:#eba454;
+  --copper-dim:rgba(235,164,84,.13);
+  --green:#3ee08a;
+  --green-dim:rgba(62,224,138,.14);
+}
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 body{min-height:100vh}
-.app{width:100%;max-width:760px;margin:0 auto;padding:10px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-.top h1{font-size:20px;margin:0;font-weight:800}
-.top p{margin:3px 0 0;color:#666;font-size:12px}
-.reset{border:0;border-radius:9px;background:#222;color:#fff;font-weight:800;padding:10px 12px}
-.table{width:100%;overflow:hidden;border:1px solid #111;border-radius:5px}
-.row{display:grid;grid-template-columns:minmax(0,40%) 15% 20% 25%;min-height:42px}
-.row>div{border-right:1px solid #111;border-bottom:1px solid #111;display:flex;align-items:center;justify-content:center;text-align:center}
-.row>div:last-child{border-right:0}
-.header{background:#ffd966;font-weight:800;font-size:12px;min-height:44px}
-.header>div{padding:5px}
-.component{background:#d9e6f2;font-size:12px;font-weight:800;padding:4px}
-.price{background:#f4cccc;font-size:13px;font-weight:800}
-.qty{background:#ffc000;padding:4px}
-.qty input{width:100%;height:34px;border:1px solid #777;border-radius:5px;background:#fff;text-align:center;font-size:17px;font-weight:800;outline:none}
-.qty input:focus{border:2px solid #222}
-.total{background:#B3E5FC;font-size:14px;font-weight:900}
-.summary{display:grid;grid-template-columns:75% 25%;min-height:44px}
-.summary-label,.summary-value{border-bottom:1px solid #111;display:flex;align-items:center;justify-content:center;font-weight:900}
-.summary-label{background:#ffe699;border-right:1px solid #111;font-size:12px}
-.summary-value{background:#ffe699;font-size:16px}
-.cobrar .summary-label,.cobrar .summary-value{background:#d9ead3}
-.cobrar .summary-label{border-right:1px solid #111}
-.offline{text-align:center;color:#666;font-size:11px;margin:10px 0}
+.app{width:100%;max-width:760px;margin:0 auto;padding:16px 12px 24px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.top h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.02em;color:var(--text)}
+.top .brand{display:flex;align-items:center;gap:9px}
+.top .brand-dot{width:9px;height:9px;border-radius:2px;background:var(--teal);box-shadow:0 0 8px var(--teal-dim);flex:none}
+.top p{margin:3px 0 0;color:var(--text-dim);font-size:12px}
+.reset{border:1px solid var(--border);border-radius:9px;background:transparent;color:var(--text-dim);font-weight:600;font-size:12px;padding:9px 13px;letter-spacing:.03em;transition:border-color .15s,color .15s,background .15s}
+.reset:active{background:var(--surface-2);color:var(--text);border-color:#3a4770}
+
+.table{width:100%;overflow:hidden;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:0 8px 24px -12px rgba(0,0,0,.5)}
+
+.row{display:grid;grid-template-columns:minmax(0,40%) 15% 20% 25%;min-height:44px}
+.row>div{border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;text-align:center;padding:2px 4px}
+.row:last-of-type>div{border-bottom:0}
+
+.header{background:var(--surface-3);font-weight:700;font-size:10.5px;min-height:38px;letter-spacing:.06em;color:var(--text-dim)}
+.header>div{padding:5px;border-bottom:1px solid var(--border)}
+
+.row:nth-of-type(even){background:rgba(255,255,255,.015)}
+
+.component{font-size:12.5px;font-weight:600;padding:8px 10px;justify-content:flex-start!important;text-align:left;color:var(--text)}
+.price{font-size:12.5px;font-weight:600;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.qty{padding:6px}
+.qty input{width:100%;height:34px;border:1px solid var(--border);border-radius:7px;background:var(--surface-3);color:var(--text);text-align:center;font-size:16px;font-weight:700;outline:none;font-variant-numeric:tabular-nums;transition:border-color .15s,box-shadow .15s}
+.qty input::placeholder{color:#4a5578}
+.qty input:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-dim)}
+.total{font-size:13.5px;font-weight:700;color:var(--teal);font-variant-numeric:tabular-nums}
+
+.receipt{border-top:1px solid var(--border)}
+.summary{display:grid;grid-template-columns:8px 1fr auto;align-items:stretch;min-height:48px;background:var(--surface-3);border-bottom:1px solid var(--border)}
+.summary:last-child{border-bottom:0;border-radius:0 0 11px 11px}
+.summary-bar{background:var(--border)}
+.summary-label{display:flex;align-items:center;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--text-dim);padding:0 12px}
+.summary-value{display:flex;align-items:center;justify-content:flex-end;font-weight:700;font-size:16px;padding:0 16px;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.summary-value::before{content:"S/ ";font-size:11px;font-weight:600;color:var(--text-dim);margin-right:3px}
+
+.mayor .summary-bar{background:var(--copper)}
+.mayor .summary-label{color:#f0b876}
+
+.cobrar{background:var(--green-dim)}
+.cobrar .summary-bar{background:var(--green)}
+.cobrar .summary-label{color:var(--green);font-size:12.5px}
+.cobrar .summary-value{font-size:19px;color:var(--green)}
+.cobrar .summary-value::before{color:var(--green);opacity:.75}
+
+.offline{text-align:center;color:var(--text-dim);font-size:11px;margin:14px 0 0;letter-spacing:.02em}
+.offline .dot{color:var(--teal)}
+
 @media(max-width:430px){
- .app{padding:6px}
- .top h1{font-size:17px}
- .reset{font-size:11px;padding:9px}
- .header{font-size:10px}
- .component{font-size:10px}
- .price{font-size:12px}
+ .app{padding:12px 8px 20px}
+ .top h1{font-size:16px}
+ .reset{font-size:11px;padding:9px 11px}
+ .header{font-size:9.5px}
+ .component{font-size:11px;padding:7px 8px}
+ .price{font-size:11.5px}
  .row{min-height:40px}
- .qty input{height:32px;font-size:16px}
+ .qty input{height:32px;font-size:15px}
  .total{font-size:12px}
- .summary-label{font-size:10px}
+ .summary-label{font-size:10.5px}
+ .summary-value{font-size:14px}
+ .cobrar .summary-value{font-size:17px}
 }
   </style>
 </head>
 <body>
   <main class="app">
     <header class="top">
-      <div>
-        <h1>PRECIO DE CIRCUITO</h1>
-        <p>Calculadora de materiales</p>
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <div>
+          <h1>PRECIO DE CIRCUITO</h1>
+          <p>Calculadora de materiales</p>
+        </div>
       </div>
       <button id="resetBtn" class="reset" type="button">LIMPIAR</button>
     </header>
@@ -66,22 +111,31 @@ body{min-height:100vh}
         <div>COMPONENTE</div>
         <div>PRECIO</div>
         <div>CANTIDAD</div>
-        <div>PRECIO TOTAL</div>
+        <div>TOTAL</div>
       </div>
 
       <div id="rows"></div>
 
-      <div class="summary">
-        <div class="summary-label">PRECIO TOTAL</div>
-        <div id="grandTotal" class="summary-value">0</div>
-      </div>
-      <div class="summary cobrar">
-        <div class="summary-label">MONTO / COBRAR</div>
-        <div id="chargeTotal" class="summary-value">0</div>
+      <div class="receipt">
+        <div class="summary">
+          <div class="summary-bar"></div>
+          <div class="summary-label">PRECIO TOTAL</div>
+          <div id="grandTotal" class="summary-value">0</div>
+        </div>
+        <div class="summary mayor">
+          <div class="summary-bar"></div>
+          <div class="summary-label">PRECIO POR MAYOR</div>
+          <div id="wholesaleTotal" class="summary-value">0</div>
+        </div>
+        <div class="summary cobrar">
+          <div class="summary-bar"></div>
+          <div class="summary-label">PRECIO AL PUBLICO</div>
+          <div id="chargeTotal" class="summary-value">0</div>
+        </div>
       </div>
     </section>
 
-    <p class="offline">● Aplicación local · funciona sin Internet</p>
+    <p class="offline"><span class="dot">●</span> Aplicación local · funciona sin Internet</p>
   </main>
   <script>
 const data = [
@@ -107,6 +161,7 @@ const data = [
 const rows = document.getElementById("rows");
 const grandTotal = document.getElementById("grandTotal");
 const chargeTotal = document.getElementById("chargeTotal");
+const wholesaleTotal = document.getElementById("wholesaleTotal");
 const resetBtn = document.getElementById("resetBtn");
 
 function money(n){
@@ -135,7 +190,8 @@ function calculate(){
     sum+=total;
   });
   grandTotal.textContent=money(sum);
-  chargeTotal.textContent=money(sum*3);
+  wholesaleTotal.textContent=money(sum*2.3);
+  chargeTotal.textContent=money(sum*2.7);
 }
 
 rows.addEventListener("input",calculate);
