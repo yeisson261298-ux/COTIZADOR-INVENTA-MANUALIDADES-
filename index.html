@@ -118,33 +118,4 @@ const wholesaleTotal = document.getElementById("wholesaleTotal");
 const resetBtn = document.getElementById("resetBtn");
 function money(n){return n.toLocaleString("es-PE",{minimumFractionDigits:0,maximumFractionDigits:2});}
 data.forEach(([name,price],i)=>{
-  const row=document.createElement("div");
-  row.className="row";
-  row.innerHTML=`<div class="component">${name}</div><div class="price">${price}</div><div class="qty"><input id="q${i}" type="number" min="0" step="0.01" inputmode="decimal" autocomplete="off"></div><div class="total" id="t${i}">0</div>`;
-  rows.appendChild(row);
-});
-function calculate(){
-  let sum=0;
-  data.forEach(([,price],i)=>{
-    const qty=parseFloat(document.getElementById(`q${i}`).value)||0;
-    const total=price*qty;
-    document.getElementById(`t${i}`).textContent=money(total);
-    sum+=total;
-  });
-  grandTotal.textContent=money(sum);
-  wholesaleTotal.textContent=money(sum*2.3);
-  chargeTotal.textContent=money(sum*2.7);
-}
-rows.addEventListener("input",calculate);
-resetBtn.addEventListener("click",()=>{rows.querySelectorAll("input").forEach(input=>input.value="");calculate();});
-calculate();
-  </script>
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js");
-      });
-    }
-  </script>
-</body>
-</html>
+  const row=document.createElement
