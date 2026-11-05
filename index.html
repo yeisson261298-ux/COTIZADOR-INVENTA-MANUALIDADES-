@@ -2,49 +2,108 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cotizador Inventa PRO</title>
+<title>Precio de Circuito</title>
 <link rel="manifest" href="./manifest.json">
 <style>
-body{background:#0f172a;color:#fff;font-family:Arial;padding:12px;margin:0}
-.tabs{display:flex;gap:8px;margin-bottom:12px}
-.tab{flex:1;padding:12px;border-radius:12px;border:0;font-weight:bold;background:#1e293b;color:#94a3b8}
-.tab.active{background:#2dd4bf;color:#000}
-.card{background:#162032;border-radius:14px;padding:10px}
-input{background:#0f172a;border:1px solid #334155;color:#fff;padding:7px;border-radius:8px;width:65px;text-align:center}
-table{width:100%} td,th{padding:8px;text-align:center;border-top:1px solid #1e293b} td:first-child{text-align:left}
-.btn{padding:10px 14px;border-radius:10px;border:0;font-weight:bold}
-.btn-edit{background:#2dd4bf;color:#000}.btn-add{background:#334155;color:#fff}
+body{background:#121c2f;color:#fff;font-family:Arial;margin:0;padding:12px}
+.header{display:flex;justify-content:space-between;align-items:center}
+h2{margin:0;line-height:1.1} h2 span{color:#94a3b8;font-size:13px;font-weight:normal}
+.btn{border:1px solid #2dd4bf;background:transparent;color:#2dd4bf;padding:8px 14px;border-radius:10px;font-weight:bold}
+.btn2{border:1px solid #334155;color:#94a3b8;background:transparent}
+.card{background:#1a2744;border-radius:16px;overflow:hidden;margin-top:12px;border:1px solid #1e293b}
+table{width:100%;border-collapse:collapse} th{color:#94a3b8;font-size:11px;padding:12px 4px;letter-spacing:1px}
+td{border-top:1px solid #22304f;padding:6px 4px;text-align:center}
+td:first-child{text-align:left;font-weight:bold;font-size:12px;padding-left:8px}
+input{background:#121c2f;border:1px solid #22304f;color:#fff;padding:8px 4px;border-radius:10px;width:55px;text-align:center}
+.total{color:#2dd4bf;font-weight:bold}
+.adminOnly{display:none}
+body.isAdmin .adminOnly{display:inline-block}
+#login{position:fixed;inset:0;background:#000000cc;display:none;align-items:center;justify-content:center;z-index:99}
+#box{background:#1a2744;padding:20px;border-radius:14px;width:280px}
+#box input{width:90%;margin:6px 0;padding:12px}
 </style>
 </head>
 <body>
-<h3 style="margin:6px 0">COTIZADOR INVENTA PRO</h3>
-<div class="tabs">
-<button id="tabC" class="tab active" onclick="setTab('cliente')">PRECIO CLIENTE</button>
-<button id="tabM" class="tab" onclick="setTab('mayor')">PRECIO MAYORISTA / CIRCUITO</button>
+<div class="header">
+<div><h2>PRECIO DE<br>CIRCUITO<br><span>Calculadora de materiales</span></h2></div>
+<div style="display:flex;gap:8px"><button class="btn" onclick="abrirLogin()" id="bAdmin">ADMIN</button><button class="btn btn2" onclick="limpiar()">LIMPIAR</button></div>
 </div>
+
 <div class="card">
-<div style="display:flex;justify-content:space-between;margin-bottom:8px">
-<button class="btn btn-edit" onclick="modoEditar()">✏️ EDITAR</button>
-<button class="btn btn-add" onclick="guardar()">💾 GUARDAR</button>
+<table>
+<thead><tr><th>COMPONENTE</th><th>PRECIO</th><th>CANTIDAD</th><th>TOTAL</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+<div style="padding:12px;display:flex;gap:8px" class="adminOnly">
+<button class="btn" onclick="agregar()">+ Agregar</button>
+<button class="btn" onclick="guardar()">💾 GUARDAR</button>
 </div>
-<table><thead><tr><th>COMPONENTE</th><th>PRECIO</th><th>CANT</th><th>TOTAL</th></tr></thead><tbody id="tbody"></tbody></table>
-<div style="margin-top:10px;display:flex;gap:8px"><button class="btn btn-add" onclick="agregar()">+ Agregar</button><button class="btn btn-add" onclick="reset()">↩️ Restaurar</button></div>
-<h2>Total <span id="labelTotal">CLIENTE</span>: S/ <span id="total">0</span></h2>
+<h3 style="padding:0 12px">TOTAL: S/ <span id="total" style="color:#2dd4bf">0</span></h3>
 </div>
+
+<div id="login"><div id="box">
+<h3>Admin</h3>
+<input id="u" placeholder="Usuario"><input id="p" type="password" placeholder="Clave">
+<div style="display:flex;gap:8px"><button class="btn" style="flex:1" onclick="login()">Entrar</button><button class="btn btn2" style="flex:1" onclick="cerrar()">Cerrar</button></div>
+<p style="font-size:11px;color:#94a3b8">admin / inventa123</p>
+</div></div>
+
 <script>
-let tab='cliente';
-let edit=false;
-let base=[["PORTAPILAS",2],["INTERRUPTOR",1],["LED",0.5],["MOTOREDUCTOR",8],["MOTOR DC",6],["MOTOR MABUCHI",9],["MOTOR BOMBA",9],["PANEL",12],["CABLE",0.5],["SILICONA",1],["MANO DE OBRA",10]];
-let data=JSON.parse(localStorage.getItem('cotizador_unificado')||'null')||base;
-function setTab(t){tab=t;document.getElementById('tabC').classList.toggle('active',t=='cliente');document.getElementById('tabM').classList.toggle('active',t=='mayor');document.getElementById('labelTotal').innerText=t=='cliente'?'CLIENTE':'MAYORISTA';render()}
-function render(){tbody.innerHTML='';data.forEach((c,i)=>{if(tab=='mayor'&&c[0]=='MANO DE OBRA')return; tbody.innerHTML+=`<tr><td contenteditable="${edit}" id="n${i}">${c[0]}</td><td><input id="p${i}" value="${c[1]}" type="number" step="0.1" oninput="calc()"></td><td><input id="q${i}" type="number" value="1" oninput="calc()"></td><td id="t${i}">0</td><td style="${edit?'':'display:none'}"><button onclick="borrar(${i})">X</button></td></tr>`});calc()}
-function calc(){let tot=0;data.forEach((c,i)=>{let el=document.getElementById('p'+i);if(!el)return;let p=parseFloat(el.value||0);let q=parseFloat(document.getElementById('q'+i)?.value||0);if(edit)data[i][0]=document.getElementById('n'+i).innerText;data[i][1]=p;let t=p*q;document.getElementById('t'+i).innerText=t.toFixed(1);if(tab=='mayor'&&c[0]=='MANO DE OBRA')return;tot+=t});document.getElementById('total').innerText=tot.toFixed(1)}
-function modoEditar(){edit=!edit; if(edit)alert('Toca el nombre y el precio para cambiarlos');render()}
+let base=[
+["PORTAPILAS",2],
+["INTERRUPTOR",1],
+["LED",0.5],
+["MOTOREDUCTOR",8],
+["MOTOR DC - BAJO",6],
+["MOTOR MABUCHI - MEDIO",9],
+["MOTOR MABUCHI MMN - ALTO",10],
+["MOTOR - BOMBA DE AGUA",9],
+["PANEL - BAJO",12],
+["PANEL - MEDIO",15],
+["BROCHE PARA BATERIA",1],
+["CABLE",0.5],
+["MANGUERA (VENOCLISIS)",1],
+["JERINGA",0.3]
+];
+let data = JSON.parse(localStorage.getItem('precio_circuito_v1')||'null') || JSON.parse(JSON.stringify(base));
+let isAdmin = localStorage.getItem('circuito_admin')=='1';
+
+function render(){
+document.body.classList.toggle('isAdmin', isAdmin);
+document.getElementById('bAdmin').innerText=isAdmin?'SALIR ADMIN':'ADMIN';
+tbody.innerHTML='';
+data.forEach((c,i)=>{
+tbody.innerHTML+=`<tr>
+<td contenteditable="${isAdmin}" onblur="data[${i}][0]=this.innerText">${c[0]}</td>
+<td><input ${isAdmin?'':'readonly'} id="p${i}" type="number" step="0.1" value="${c[1]}" oninput="calc()"></td>
+<td><input id="q${i}" type="number" placeholder="" oninput="calc()"></td>
+<td class="total" id="t${i}">0</td>
+<td class="adminOnly"><button onclick="borrar(${i})" style="background:#ef4444;border:0;color:#fff;border-radius:6px;padding:4px 8px">X</button></td>
+</tr>`;
+});
+calc();
+}
+function calc(){
+let tot=0;
+data.forEach((c,i)=>{
+let p=parseFloat(document.getElementById('p'+i).value||0);
+let q=parseFloat(document.getElementById('q'+i).value||0);
+if(isAdmin){data[i][1]=p}
+let s=p*q;
+document.getElementById('t'+i).innerText=isNaN(s)?0:s;
+tot+=isNaN(s)?0:s;
+});
+document.getElementById('total').innerText=tot.toFixed(1);
+}
+function abrirLogin(){if(isAdmin){isAdmin=false;localStorage.removeItem('circuito_admin');render();return}document.getElementById('login').style.display='flex'}
+function cerrar(){document.getElementById('login').style.display='none'}
+function login(){if(u.value=='admin'&&p.value=='inventa123'){isAdmin=true;localStorage.setItem('circuito_admin','1');cerrar();render()}else alert('Clave mala')}
+function limpiar(){document.querySelectorAll('[id^=q]').forEach(e=>e.value='');calc()}
 function agregar(){data.push(["NUEVO",1]);render()}
 function borrar(i){data.splice(i,1);render()}
-function guardar(){localStorage.setItem('cotizador_unificado',JSON.stringify(data));alert('¡Guardado! Ahora tus precios quedan en tu celular')}
-function reset(){localStorage.removeItem('cotizador_unificado');data=[...base];render()}
-setTab('cliente'); if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js');
+function guardar(){localStorage.setItem('precio_circuito_v1',JSON.stringify(data));alert('Guardado en este celular')}
+render();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
 </script>
 </body>
 </html>
