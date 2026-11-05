@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1027">
+  <meta name="description" content="Calculadora offline de materiales para circuitos.">
+  <title>Precio de Circuito</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <style>
+    :root { color-scheme: dark; --bg:#0b1027; --panel:#172238; --line:#26354e; --input:#0d172c; --muted:#9aa8bf; --teal:#2dd4bf; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:16px; padding-bottom:30px; background:var(--bg); color:#f8fafc; font-family:Arial,Helvetica,sans-serif; }
+    .wrap { max-width:900px; margin:0 auto; }
+    .top { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    h1 { font-size:clamp(23px,5vw,34px); line-height:1.1; margin:0; letter-spacing:-.5px; }
+    .subtitle { color:var(--muted); margin:8px 0 18px; }
+    .actions { display:flex; gap:8px; }
+    button { cursor:pointer; font-weight:700; border-radius:12px; padding:11px 15px; border:1px solid var(--teal); color:var(--teal); background:transparent; }
+    button.secondary { border-color:#39465d; color:#aab5c8; }
+    button.danger { border-color:#ef4444; color:#fff; background:#dc2626; padding:7px 10px; }
+    button:active { transform:scale(.98); }
+    .table-card { overflow:hidden; border:1px solid var(--line); border-radius:20px; background:var(--panel); }
+    .table-scroll { overflow-x:auto; }
+    table { width:100%; min-width:570px; border-collapse:collapse; }
+    th { color:var(--muted); font-size:12px; padding:16px 8px; text-align:center; white-space:nowrap; }
+    td { border-top:1px solid var(--line); padding:9px 7px; text-align:center; }
+    td:first-child { text-align:left; padding-left:14px; font-weight:700; min-width:175px; }
+    input { min-width:0; width:100%; padding:11px 7px; border:1px solid #263750; border-radius:13px; background:var(--input); color:#fff; text-align:center; font:inherit; }
+    input:disabled { opacity:1; color:#fff; }
+    .price-input { max-width:110px; }
+    .qty-input { max-width:110px; }
+    .name-input { min-width:150px; text-align:left; }
+    .total { color:var(--teal); font-size:19px; font-weight:800; white-space:nowrap; }
+    .admin-zone { display:none; padding:12px; gap:9px; flex-wrap:wrap; border-top:1px solid var(--line); }
+    body.is-admin .admin-zone { display:flex; }
+    .totals { margin-top:14px; overflow:hidden; border:1px solid var(--line); border-radius:18px; }
+    .total-row { display:flex; justify-content:space-between; gap:12px; padding:17px 14px; font-size:19px; font-weight:800; }
+    .grand { color:#aab5c8; background:#172238; }
+    .wholesale { color:#fbbf24; background:#191a31; border-left:6px solid #f59e0b; }
+    .public { color:var(--teal); background:#0d3029; border-left:6px solid var(--teal); }
+    .multiplier { display:none; align-items:center; gap:8px; font-size:12px; font-weight:500; }
+    body.is-admin .multiplier { display:flex; }
+    .multiplier input { width:66px; padding:6px 4px; }
+    .foot { text-align:center; color:#718096; font-size:13px; margin-top:17px; }
+    #login { position:fixed; inset:0; z-index:10; display:none; align-items:center; justify-content:center; padding:18px; background:#000b; }
+    .login-box { width:min(340px,100%); padding:22px; border:1px solid #39465d; border-radius:18px; background:#172238; box-shadow:0 20px 60px #0008; }
+    .login-box h2 { margin:0 0 14px; }
+    .login-box input { margin:6px 0; padding:13px; text-align:left; }
+    .login-actions { display:flex; gap:8px; margin-top:12px; }
+    .login-actions button { flex:1; }
+    .hint { color:#fca5a5; font-size:13px; min-height:17px; }
+    @media(max-width:520px) { body{padding:12px;} .total-row{font-size:16px;padding:15px 11px;} .actions button{padding:10px 12px;} }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>PRECIO DE<br>CIRCUITO</h1>
+    <div class="actions">
+      <button id="adminBtn" type="button">ADMIN</button>
+      <button class="secondary" id="clearBtn" type="button">LIMPIAR</button>
+    </div>
+  </header>
+  <p class="subtitle">Calculadora de materiales</p>
+
+  <section class="table-card">
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>COMPONENTE</th><th>PRECIO</th><th>CANTIDAD</th><th>TOTAL</th><th id="deleteHead" hidden></th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="admin-zone" id="adminZone">
+      <button id="addBtn" type="button">+ AGREGAR</button>
+      <button id="saveBtn" type="button">GUARDAR CAMBIOS</button>
+    </div>
+  </section>
+
+  <section class="totals">
+    <div class="total-row grand"><span>PRECIO TOTAL</span><span>S/ <b id="grandTotal">0.0</b></span></div>
+    <div class="total-row wholesale">
+      <span>PRECIO POR MAYOR <small class="multiplier">MULT. <input id="wholesaleMult" type="number" min="0" step="0.1" aria-label="Multiplicador por mayor"></small></span>
+      <span>S/ <b id="wholesaleTotal">0.0</b></span>
+    </div>
+    <div class="total-row public">
+      <span>PRECIO AL PÚBLICO <small class="multiplier">MULT. <input id="publicMult" type="number" min="0" step="0.1" aria-label="Multiplicador al público"></small></span>
+      <span>S/ <b id="publicTotal">0.0</b></span>
+    </div>
+  </section>
+  <p class="foot">● Aplicación local · funciona sin Internet</p>
+</div>
+
+<div id="login" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="login-box">
+    <h2 id="loginTitle">Acceso administrador</h2>
+    <input id="username" autocomplete="username" placeholder="Usuario">
+    <input id="password" type="password" autocomplete="current-password" placeholder="Clave">
+    <div class="hint" id="loginError"></div>
+    <div class="login-actions">
+      <button id="loginBtn" type="button">ENTRAR</button>
+      <button class="secondary" id="closeLoginBtn" type="button">CERRAR</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_ITEMS = [
+  ["PORTAPILAS",2],["INTERRUPTOR",1],["LED",0.5],["MOTOREDUCTOR",8],
+  ["MOTOR DC - BAJO",6],["MOTOR MABUCHI - MEDIO",9],["MOTOR MABUCHI MMN - ALTO",10],
+  ["MOTOR - BOMBA DE AGUA",9],["PANEL - BAJO",12],["PANEL - MEDIO",15],
+  ["BROCHE PARA BATERIA",1],["CABLE",0.5],["MANGUERA (VENOCLISIS)",1],["JERINGA",0.3]
+];
+const STORAGE_KEY = "precio_circuito_pwa_v1";
+let isAdmin = false;
+let quantities = {};
+
+function loadConfig() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved && Array.isArray(saved.items)) {
+      return {
+        items: saved.items.filter(x => Array.isArray(x) && x.length >= 2).map(x => [String(x[0]), Number(x[1]) || 0]),
+        wholesale: Number.isFinite(Number(saved.wholesale)) ? Number(saved.wholesale) : 1.6,
+        public: Number.isFinite(Number(saved.public)) ? Number(saved.public) : 2.2
+      };
+    }
+  } catch (e) {}
+  return {items: DEFAULT_ITEMS.map(x => [...x]), wholesale:1.6, public:2.2};
+}
+let config = loadConfig();
+
+const $ = id => document.getElementById(id);
+const money = n => (Number.isFinite(n) ? n : 0).toFixed(1);
+
+function render() {
+  document.body.classList.toggle("is-admin", isAdmin);
+  $("adminBtn").textContent = isAdmin ? "SALIR" : "ADMIN";
+  $("deleteHead").hidden = !isAdmin;
+  $("wholesaleMult").value = config.wholesale;
+  $("publicMult").value = config.public;
+
+  $("tbody").innerHTML = config.items.map((item, i) => {
+    const name = escapeHtml(item[0]);
+    const price = Number(item[1]) || 0;
+    return `<tr>
+      <td>${isAdmin
+        ? `<input class="name-input" aria-label="Nombre del componente" data-name="${i}" value="${name}">`
+        : name}</td>
+      <td><input class="price-input" aria-label="Precio" data-price="${i}" type="number" min="0" step="0.1" value="${price}" ${isAdmin ? "" : "disabled"}></td>
+      <td><input class="qty-input" aria-label="Cantidad" data-qty="${i}" type="number" min="0" step="1" inputmode="numeric" placeholder="0" value="${quantities[i] || ""}"></td>
+      <td class="total" id="rowTotal${i}">0.0</td>
+      ${isAdmin ? `<td><button class="danger" type="button" data-delete="${i}" aria-label="Eliminar componente">X</button></td>` : ""}
+    </tr>`;
+  }).join("");
+
+  $("tbody").querySelectorAll("[data-qty]").forEach(el => el.addEventListener("input", calculate));
+  $("tbody").querySelectorAll("[data-price]").forEach(el => el.addEventListener("input", () => {
+    const i = Number(el.dataset.price);
+    config.items[i][1] = Math.max(0, Number(el.value) || 0);
+    calculate();
+  }));
+  $("tbody").querySelectorAll("[data-name]").forEach(el => el.addEventListener("input", () => {
+    config.items[Number(el.dataset.name)][0] = el.value;
+  }));
+  $("tbody").querySelectorAll("[data-delete]").forEach(el => el.addEventListener("click", () => {
+    const i = Number(el.dataset.delete);
+    if (confirm(`¿Eliminar "${config.items[i][0]}"?`)) {
+      config.items.splice(i, 1);
+      quantities = {};
+      render();
+    }
+  }));
+  $("wholesaleMult").oninput = e => { config.wholesale = Math.max(0, Number(e.target.value) || 0); calculate(); };
+  $("publicMult").oninput = e => { config.public = Math.max(0, Number(e.target.value) || 0); calculate(); };
+  calculate();
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function calculate() {
+  let sum = 0;
+  config.items.forEach((item, i) => {
+    const q = Number($(`tbody`).querySelector(`[data-qty="${i}"]`)?.value || 0);
+    const p = isAdmin
+      ? Number($(`tbody`).querySelector(`[data-price="${i}"]`)?.value ?? item[1]) || 0
+      : Number(item[1]) || 0;
+    quantities[i] = q;
+    const subtotal = p * q;
+    sum += subtotal;
+    const row = $(`rowTotal${i}`);
+    if (row) row.textContent = money(subtotal);
+  });
+  $("grandTotal").textContent = money(sum);
+  $("wholesaleTotal").textContent = money(sum * config.wholesale);
+  $("publicTotal").textContent = money(sum * config.public);
+}
+
+function saveConfig() {
+  // Read current editable fields before saving.
+  $("tbody").querySelectorAll("[data-name]").forEach(el => config.items[Number(el.dataset.name)][0] = el.value.trim() || "NUEVO");
+  $("tbody").querySelectorAll("[data-price]").forEach(el => config.items[Number(el.dataset.price)][1] = Math.max(0, Number(el.value) || 0));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  alert("¡Cambios guardados en este dispositivo!");
+}
+
+function openLogin() {
+  $("loginError").textContent = "";
+  $("username").value = "";
+  $("password").value = "";
+  $("login").style.display = "flex";
+  $("username").focus();
+}
+function closeLogin() { $("login").style.display = "none"; }
+function login() {
+  const user = $("username").value.trim().toLowerCase();
+  const pass = $("password").value.trim();
+  if (user === "inventa" && pass === "inventa123") {
+    isAdmin = true;
+    closeLogin();
+    render();
+  } else {
+    $("loginError").textContent = "Usuario o contraseña incorrectos.";
+  }
+}
+
+$("adminBtn").addEventListener("click", () => {
+  if (isAdmin) {
+    saveConfig();
+    isAdmin = false;
+    render();
+  } else openLogin();
+});
+$("loginBtn").addEventListener("click", login);
+$("closeLoginBtn").addEventListener("click", closeLogin);
+$("password").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+$("addBtn").addEventListener("click", () => { config.items.push(["NUEVO COMPONENTE", 0]); render(); });
+$("saveBtn").addEventListener("click", saveConfig);
+$("clearBtn").addEventListener("click", () => {
+  if (confirm("¿Limpiar todas las cantidades?")) {
+    quantities = {};
+    $("tbody").querySelectorAll("[data-qty]").forEach(el => el.value = "");
+    calculate();
+  }
+});
+
+render();
+
+// Cache the app shell for offline use. The service worker file is registered below.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>
