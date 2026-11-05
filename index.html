@@ -1,236 +1,59 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0b1220">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <title>Precio de Circuito</title>
-  <style>
-:root{
-  --bg:#0b1220;
-  --surface:#121a2c;
-  --surface-2:#182338;
-  --surface-3:#0e1728;
-  --border:#243050;
-  --text:#e8edf7;
-  --text-dim:#8b98b3;
-  --teal:#2dd4bf;
-  --teal-dim:rgba(45,212,191,.13);
-  --copper:#eba454;
-  --copper-dim:rgba(235,164,84,.13);
-  --green:#3ee08a;
-  --green-dim:rgba(62,224,138,.14);
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-body{min-height:100vh}
-.app{width:100%;max-width:760px;margin:0 auto;padding:16px 12px 24px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
-.top h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.02em;color:var(--text)}
-.top .brand{display:flex;align-items:center;gap:9px}
-.top .brand-dot{width:9px;height:9px;border-radius:2px;background:var(--teal);box-shadow:0 0 8px var(--teal-dim);flex:none}
-.top p{margin:3px 0 0;color:var(--text-dim);font-size:12px}
-.reset{border:1px solid var(--border);border-radius:9px;background:transparent;color:var(--text-dim);font-weight:600;font-size:12px;padding:9px 13px;letter-spacing:.03em;cursor:pointer}
-.btn-admin{border:1px solid var(--teal);color:var(--teal);background:transparent;border-radius:9px;padding:9px 13px;font-size:12px;font-weight:700;cursor:pointer}
-.btn-admin.active{background:var(--teal);color:#042f2e}
-.table{width:100%;overflow:hidden;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:0 8px 24px -12px rgba(0,0,0,.5)}
-.row{display:grid;grid-template-columns:minmax(0,40%) 15% 20% 25%;min-height:44px}
-.row>div{border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;text-align:center;padding:2px 4px}
-.header{background:var(--surface-3);font-weight:700;font-size:10.5px;min-height:38px;letter-spacing:.06em;color:var(--text-dim)}
-.row:nth-of-type(even){background:rgba(255,255,255,.015)}
-.component{font-size:12.5px;font-weight:600;padding:8px 10px;justify-content:flex-start!important;text-align:left;color:var(--text)}
-.price{font-size:12.5px;font-weight:600;color:var(--text-dim)}
-.qty{padding:6px}
-.qty input{width:100%;height:34px;border:1px solid var(--border);border-radius:7px;background:var(--surface-3);color:var(--text);text-align:center;font-size:16px;font-weight:700;outline:none}
-.qty input:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-dim)}
-.total{font-size:13.5px;font-weight:700;color:var(--teal)}
-.receipt{border-top:1px solid var(--border)}
-.summary{display:grid;grid-template-columns:8px 1fr auto;align-items:stretch;min-height:48px;background:var(--surface-3);border-bottom:1px solid var(--border)}
-.summary:last-child{border-bottom:0;border-radius:0 0 11px 11px}
-.summary-bar{background:var(--border)}
-.summary-label{display:flex;align-items:center;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--text-dim);padding:0 12px}
-.summary-value{display:flex;align-items:center;justify-content:flex-end;font-weight:700;font-size:16px;padding:0 16px;color:var(--text);white-space:nowrap}
-.summary-value::before{content:"S/ ";font-size:11px;font-weight:600;color:var(--text-dim);margin-right:3px}
-.mayor .summary-bar{background:var(--copper)}
-.mayor .summary-label{color:#f0b876}
-.cobrar{background:var(--green-dim)}
-.cobrar .summary-bar{background:var(--green)}
-.cobrar .summary-label{color:var(--green);font-size:12.5px}
-.cobrar .summary-value{font-size:19px;color:var(--green)}
-.cobrar .summary-value::before{color:var(--green);opacity:.75}
-.offline{text-align:center;color:var(--text-dim);font-size:11px;margin:14px 0 0}
-.offline .dot{color:var(--teal)}
-.adminPanel{display:none;background:var(--surface-2);border:1px solid var(--teal);border-radius:12px;padding:14px;margin-bottom:16px}
-.adminPanel h3{margin:0 0 8px;font-size:14px;color:var(--teal)}
-.adminGrid{display:grid;grid-template-columns:1fr 90px auto;gap:8px;margin-bottom:10px}
-.adminGrid input{padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);color:white;font-size:13px}
-.adminGrid button{background:var(--teal);border:none;border-radius:8px;padding:0 14px;font-weight:800;color:#042f2e;cursor:pointer}
-.multRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.multRow label{font-size:11px;color:var(--text-dim)}
-.multRow input{width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);color:white}
-.iconBtn{background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-dim)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
-.modalBox{background:#121a2c;border:1px solid var(--border);border-radius:16px;padding:20px;width:100%;max-width:340px}
-.modalBox input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid var(--border);background:var(--surface-3);color:white}
-.modalBox button{width:100%;padding:12px;border-radius:10px;border:none;font-weight:700;cursor:pointer;margin-top:8px}
-.btnPrimary{background:var(--teal);color:#042f2e}
-.btnGhost{background:transparent;border:1px solid var(--border)!important;color:var(--text-dim)}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRECIO DE CIRCUITO</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f172a">
+<style>
+  body{background:#0f172a;color:white;font-family:Arial;padding:10px;margin:0}
+  .header{display:flex;justify-content:space-between;align-items:center}
+  .btn{border:1px solid #2dd4bf;color:#2dd4bf;background:transparent;padding:8px 14px;border-radius:10px;font-weight:bold}
+  table{width:100%;border-collapse:collapse;margin-top:15px;background:#162032;border-radius:12px;overflow:hidden}
+  th{color:#94a3b8;font-size:12px;padding:10px}
+  td{padding:8px;border-top:1px solid #1e293b;text-align:center}
+  td:first-child{text-align:left;font-weight:bold;font-size:13px}
+  input{width:60px;background:#0f172a;border:1px solid #334155;color:white;padding:8px;border-radius:8px;text-align:center}
+  .total{color:#2dd4bf;font-weight:bold}
+  .resumen{margin-top:15px;background:#162032;padding:15px;border-radius:12px}
+</style>
 </head>
 <body>
-  <main class="app">
-    <header class="top">
-      <div class="brand"><span class="brand-dot"></span><div><h1>PRECIO DE CIRCUITO</h1><p>Calculadora de materiales</p></div></div>
-      <div style="display:flex;gap:8px"><button id="adminBtn" class="btn-admin" type="button">ADMIN</button><button id="resetBtn" class="reset" type="button">LIMPIAR</button></div>
-    </header>
-    <div id="adminPanel" class="adminPanel">
-      <h3>Panel Admin - Agregar componente</h3>
-      <div class="adminGrid">
-        <input id="newName" placeholder="Nombre ej: MOTOR 12V">
-        <input id="newPrice" type="number" step="0.01" placeholder="Precio">
-        <button id="addBtn" type="button">+ ADD</button>
-      </div>
-      <p style="font-size:11px;color:var(--text-dim);margin:0">El nuevo componente usa automaticamente tus multiplicadores actuales (2.3 mayor / 2.7 publico).</p>
-      <div class="multRow">
-        <label>Multiplicador POR MAYOR <input id="multMayor" type="number" step="0.1" value="2.3"></label>
-        <label>Multiplicador AL PUBLICO <input id="multPublico" type="number" step="0.1" value="2.7"></label>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button id="logoutBtn" class="reset" type="button">Cerrar Admin</button>
-      </div>
-    </div>
-    <section class="table">
-      <div class="row header"><div>COMPONENTE</div><div>PRECIO</div><div>CANTIDAD</div><div>TOTAL</div></div>
-      <div id="rows"></div>
-      <div class="receipt">
-        <div class="summary"><div class="summary-bar"></div><div class="summary-label">PRECIO TOTAL</div><div id="grandTotal" class="summary-value">0</div></div>
-        <div class="summary mayor"><div class="summary-bar"></div><div class="summary-label">PRECIO POR MAYOR</div><div id="wholesaleTotal" class="summary-value">0</div></div>
-        <div class="summary cobrar"><div class="summary-bar"></div><div class="summary-label">PRECIO AL PUBLICO</div><div id="chargeTotal" class="summary-value">0</div></div>
-      </div>
-    </section>
-    <p class="offline"><span class="dot">●</span> Aplicacion local - funciona sin Internet</p>
-  </main>
-  <div id="loginModal" class="modal">
-    <div class="modalBox">
-      <h3>Login Admin</h3>
-      <p style="font-size:12px;color:var(--text-dim)">Acceso solo administradores</p>
-      <input id="loginUser" placeholder="Usuario">
-      <input id="loginPass" type="password" placeholder="Contraseña">
-      <button id="doLogin" class="btnPrimary" type="button">Entrar</button>
-      <button id="closeLogin" class="btnGhost" type="button">Cancelar</button>
-      <p id="loginErr" style="display:none;color:#fb7185;font-size:12px;margin-top:8px">Usuario o clave incorrecta</p>
-    </div>
-  </div>
-  <script>
-const DEFAULT_DATA = [
-  ["PORTAPILAS",2],["INTERRUPTOR",1],["LED",0.5],["MOTOREDUCTOR",8],["MOTOR DC - BAJO",6],
-  ["MOTOR MABUCHI - MEDIO",9],["MOTOR MABUCHI MMN - ALTO",10],["MOTOR - BOMBA DE AGUA",9],
-  ["PANEL - BAJO",12],["PANEL - MEDIO",15],["BROCHE PARA BATERIA",2],["CABLE",0.5],
-  ["MANGUERA (VENOCLISIS)",1],["JERINGA",0.3],["BATERIA TOSHIBA",7],["BATERIA DURACELL",17],
-  ["PILA PANASONIC",2],["PILA DURACELL",7],["ARDUINO UNO",42],["ARDUINO NANO",38],
-  ["SENSOR DE LLUVIA",12],["SENSOR ULTRA SONICO",12],["SERVOMOTOR",12],["JACK 9V",2]
+<div class="header">
+  <div><h2 style="margin:0">PRECIO DE CIRCUITO</h2><small style="color:#94a3b8">Calculadora de materiales</small></div>
+  <div><button class="btn" onclick="location.reload()">LIMPIAR</button></div>
+</div>
+
+<table id="tabla">
+<thead><tr><th>COMPONENTE</th><th>PRECIO</th><th>CANTIDAD</th><th>TOTAL</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<div class="resumen">
+  <h3>Total: S/ <span id="granTotal">0</span></h3>
+</div>
+
+<script>
+const componentes = [
+["PORTAPILAS",2],["INTERRUPTOR",1],["LED",0.5],["MOTOREDUCTOR",8],["MOTOR DC - BAJO",6],
+["MOTOR MABUCHI - MEDIO",9],["MOTOR MABUCHI MMN - ALTO",10],["MOTOR - BOMBA DE AGUA",9],
+["PANEL - BAJO",12],["PANEL - MEDIO",15],["BROCHE PARA BATERIA",1],["CABLE",0.5],
+["MANGUERA (VENOCLISIS)",1],["JERINGA",0.3]
 ];
-let data = JSON.parse(localStorage.getItem('circuito_data') || 'null');
-if(!data){ data = DEFAULT_DATA.map((d,i)=>({id:i,name:d[0],price:d[1]})); }
-let qtyMap = JSON.parse(localStorage.getItem('circuito_qty') || '{}');
-let multMayor = parseFloat(localStorage.getItem('multMayor') || '2.3');
-let multPublico = parseFloat(localStorage.getItem('multPublico') || '2.7');
-let isAdmin = localStorage.getItem('isAdmin')==='1';
-const rows = document.getElementById("rows");
-const grandTotal = document.getElementById("grandTotal");
-const chargeTotal = document.getElementById("chargeTotal");
-const wholesaleTotal = document.getElementById("wholesaleTotal");
-const resetBtn = document.getElementById("resetBtn");
-const adminBtn = document.getElementById("adminBtn");
-const adminPanel = document.getElementById("adminPanel");
-const loginModal = document.getElementById("loginModal");
-document.getElementById('multMayor').value = multMayor;
-document.getElementById('multPublico').value = multPublico;
-function money(n){return n.toLocaleString("es-PE",{minimumFractionDigits:0,maximumFractionDigits:2});}
-function save(){ localStorage.setItem('circuito_data', JSON.stringify(data)); localStorage.setItem('circuito_qty', JSON.stringify(qtyMap)); localStorage.setItem('multMayor', multMayor); localStorage.setItem('multPublico', multPublico); }
-function render(){
- rows.innerHTML='';
- let sum=0;
- data.forEach((item, i)=>{
-   const qty = parseFloat(qtyMap[item.id]) || 0;
-   const total = item.price * qty;
-   sum+=total;
-   const row=document.createElement("div");
-   row.className="row";
-   row.innerHTML=`<div class="component" style="flex-direction:column;align-items:flex-start"><span>${item.name}</span>${isAdmin ? `<span style="display:flex;gap:6px;margin-top:2px"><button class="iconBtn" onclick="editItem(${i})">Editar</button><button class="iconBtn" onclick="deleteItem(${i})" style="color:#fb7185">Borrar</button></span>` : ``}</div><div class="price">${item.price}</div><div class="qty"><input id="q_${item.id}" type="number" min="0" step="0.01" inputmode="decimal" value="${qty||''}" oninput="onQty(${item.id}, this.value)"></div><div class="total" id="t_${item.id}">${money(total)}</div>`;
-   rows.appendChild(row);
- });
- grandTotal.textContent=money(sum);
- wholesaleTotal.textContent=money(sum*multMayor);
- chargeTotal.textContent=money(sum*multPublico);
- checkAdminUI();
- save();
+const tbody=document.getElementById('tbody');
+componentes.forEach((c,i)=>{
+  tbody.innerHTML+=`<tr><td>${c[0]}</td><td>${c[1]}</td><td><input type="number" id="q${i}" oninput="calc()" value=""></td><td class="total" id="t${i}">0</td></tr>`;
+});
+function calc(){
+  let total=0;
+  componentes.forEach((c,i)=>{
+    let q=parseFloat(document.getElementById('q'+i).value)||0;
+    let t=q*c[1]; document.getElementById('t'+i).innerText=t.toFixed(1); total+=t;
+  });
+  document.getElementById('granTotal').innerText=total.toFixed(1);
 }
-window.onQty = (id, v)=>{
-  qtyMap[id] = v;
-  const item = data.find(d=>d.id===id);
-  if(item){ const tot = item.price * (parseFloat(v)||0); const el = document.getElementById(`t_${id}`); if(el) el.textContent = money(tot); }
-  let sum=0; data.forEach(d=>{ sum += d.price * (parseFloat(qtyMap[d.id])||0); });
-  grandTotal.textContent=money(sum);
-  wholesaleTotal.textContent=money(sum*multMayor);
-  chargeTotal.textContent=money(sum*multPublico);
-  localStorage.setItem('circuito_qty', JSON.stringify(qtyMap));
-}
-window.editItem = (idx)=>{
-  const item = data[idx];
-  const nn = prompt('Nuevo nombre:', item.name);
-  if(nn===null) return;
-  const np = prompt('Nuevo precio:', item.price);
-  if(np===null) return;
-  item.name = nn.toUpperCase().trim() || item.name;
-  item.price = parseFloat(np) || item.price;
-  render();
-}
-window.deleteItem = (idx)=>{
-  if(confirm('Borrar '+data[idx].name+'?')){ const id=data[idx].id; delete qtyMap[id]; data.splice(idx,1); render(); }
-}
-function checkAdminUI(){
-  adminPanel.style.display = isAdmin ? 'block' : 'none';
-  adminBtn.classList.toggle('active', isAdmin);
-  adminBtn.textContent = isAdmin ? 'ADMIN OK' : 'ADMIN';
-}
-adminBtn.onclick = ()=>{ if(isAdmin){ checkAdminUI(); } else { loginModal.style.display='flex'; } }
-document.getElementById('closeLogin').onclick = ()=> loginModal.style.display='none';
-document.getElementById('doLogin').onclick = ()=>{
-  const u = document.getElementById('loginUser').value.trim().toLowerCase();
-  const p = document.getElementById('loginPass').value.trim();
-  const savedU = (localStorage.getItem('admin_user') || 'Inventa').toLowerCase();
-  const savedP = localStorage.getItem('admin_pass') || '1234';
-  if( (u===savedU && p===savedP) ){
-    isAdmin=true; localStorage.setItem('isAdmin','1'); loginModal.style.display='none'; document.getElementById('loginErr').style.display='none'; render();
-  }else{ document.getElementById('loginErr').style.display='block'; }
-}
-document.getElementById('logoutBtn').onclick = ()=>{ isAdmin=false; localStorage.setItem('isAdmin','0'); render(); }
-document.getElementById('addBtn').onclick = ()=>{
-  const name = document.getElementById('newName').value.trim();
-  const price = parseFloat(document.getElementById('newPrice').value);
-  if(!name || isNaN(price)){ alert('Escribe nombre y precio'); return; }
-  const newId = Date.now();
-  data.push({id:newId, name:name.toUpperCase(), price:price});
-  document.getElementById('newName').value=''; document.getElementById('newPrice').value='';
-  render();
-}
-document.getElementById('multMayor').oninput = (e)=>{ multMayor = parseFloat(e.target.value)||0; render(); }
-document.getElementById('multPublico').oninput = (e)=>{ multPublico = parseFloat(e.target.value)||0; render(); }
-resetBtn.onclick = ()=>{ qtyMap={}; document.querySelectorAll('#rows input').forEach(i=>i.value=''); render(); }
-render();
-if(!localStorage.getItem('admin_user')){ localStorage.setItem('admin_user','Inventa'); localStorage.setItem('admin_pass','1234'); }
-  </script>
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js");
-      });
-    }
-  </script>
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./service-worker.js'); }
+</script>
 </body>
-  </html>
+</html>
